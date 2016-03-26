@@ -59,6 +59,18 @@ def doPCA(X):
     (eigs, V) = np.linalg.eig(D) # Eigenvectors in columns
     return (eigs, V)
 
+# Fisher-Yates linear in-place shuffle
+def shuffle(array):
+    m = len(array) - 1
+    # while there are elements to shuffle
+    while m > 0:
+        # pick a random element from the end
+        i = np.random.randint(m, size=1)[0]
+        t = array[i]
+        array[i] = array[m]
+        array[m] = t
+        m = m - 1
+
 #########################################################
 ##                SHAPE DESCRIPTORS                    ##
 #########################################################
@@ -122,7 +134,15 @@ def getShapeHistogramPCA(Ps, Ns, NShells, RMax):
 #to compute distances)
 def getD2Histogram(Ps, Ns, DMax, NBins, NSamples):
     hist = np.zeros(NBins)
-    ##TODO: Finish this; fill in hist
+    bins = np.linspace(0.0, DMax, NBins)
+    copy = np.copy(Ps)
+    shuffle(copy[:, :(copy.shape[1] // 2) * 2]) # even number of points
+    a = copy[:, ::2] # evens
+    b = copy[:, 1::2] # odds
+    distances = np.sum(np.square(a - b), axis=0)
+    indices = np.digitize(distances, bins) - 1
+    count = np.bincount(indices)
+    hist[:count.shape[0]] = count
     return hist
 
 #Purpose: To create shape histogram of the angles between randomly sampled
