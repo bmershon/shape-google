@@ -55,9 +55,8 @@ def getSphereSamples(res = 2):
 #Purpose: To compute PCA on a point cloud
 #Inputs: X (3 x N array representing a point cloud)
 def doPCA(X):
-    ##TODO: Fill this in for a useful helper function
-    eigs = np.array([1, 1, 1]) #Dummy value
-    V = np.eye(3) #Dummy Value
+    D = X.dot(X.T) # X*X Transpose
+    (eigs, V) = np.linalg.eig(D) # Eigenvectors in columns
     return (eigs, V)
 
 #########################################################
@@ -72,10 +71,11 @@ def doPCA(X):
 #Returns: hist (histogram of length NShells)
 def getShapeHistogram(Ps, Ns, NShells, RMax):
     hist = np.zeros(NShells)
-    bins = np.linspace(0.0, RMax, NShells)
-    indices = np.digitize(np.sum(np.multiply(Ps, Ps), axis=0), bins)
-    count = np.bincount(indices-1)
+    bins = np.square(np.linspace(0.0, RMax, NShells))
+    indices = np.digitize(np.sum(np.multiply(Ps, Ps), axis=0), bins) - 1
+    count = np.bincount(indices)
     hist[:count.shape[0]] = count
+    
     return hist
     
 #Purpose: To create shape histogram with concentric spherical shells and
@@ -85,11 +85,16 @@ def getShapeHistogram(Ps, Ns, NShells, RMax):
 #RMax (maximum radius), SPoints: A 3 x S array of points sampled evenly on 
 #the unit sphere (get these with the function "getSphereSamples")
 def getShapeShellHistogram(Ps, Ns, NShells, RMax, SPoints):
-    NSectors = SPoints.shape[1] #A number of sectors equal to the number of
-    #points sampled on the sphere
-    #Create a 2D histogram that is NShells x NSectors
+    NSectors = SPoints.shape[1] # number of spherical samples
     hist = np.zeros((NShells, NSectors))    
-    ##TODO: Finish this; fill in hist, then sort sectors in descending order   
+    bins = np.square(np.linspace(0.0, RMax, NShells))
+    indices = np.digitize(np.sum(np.multiply(Ps, Ps), axis=0), bins) - 1
+    for i in range(NShells):
+        subset = Ps[:, indices == i]
+        D = np.dot(subset.T, SPoints) # N x M
+        nearest = np.argmax(D, 1) # for each point, the index of nearest spherical direction
+        count = np.bincount(nearest) # points associated with each direction
+        hist[i, :count.shape[0]] = np.sort(count)[::-1] 
     return hist.flatten() #Flatten the 2D histogram to a 1D array
 
 #Purpose: To create shape histogram with concentric spherical shells and to 
@@ -99,9 +104,14 @@ def getShapeShellHistogram(Ps, Ns, NShells, RMax, SPoints):
 #RMax (maximum radius), sphereRes: An integer specifying points on thes phere
 #to be used to cluster shells
 def getShapeHistogramPCA(Ps, Ns, NShells, RMax):
-    #Create a 2D histogram, with 3 eigenvalues for each shell
     hist = np.zeros((NShells, 3))
-    ##TODO: Finish this; fill in hist
+    bins = np.square(np.linspace(0.0, RMax, NShells))
+    indices = np.digitize(np.sum(np.multiply(Ps, Ps), axis=0), bins) - 1
+    for i in range(NShells):
+        subset = Ps[:, indices == i]
+        D = np.dot(subset, subset.T)
+        (eigs, V) = np.linalg.eig(D) #Eigenvectors in columns
+        hist[i, :eigs.shape[0]] = np.sort(eigs)[::-1] 
     return hist.flatten() #Flatten the 2D histogram to a 1D array
 
 #Purpose: To create shape histogram of the pairwise Euclidean distances between

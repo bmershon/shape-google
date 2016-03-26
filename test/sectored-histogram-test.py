@@ -12,19 +12,17 @@ from ShapeStatistics import *
 
 np.random.seed(100) #Replace 100 with some number you both agree on
 
-
+resolution = 1
 n = 10
-
 radius = 3
 m = PolyMesh()
 m.loadFile(sys.argv[1]) #Load a mesh
 (Ps, Ns) = samplePointCloud(m, 20000) #Sample 20,000 points and associated normals
-hist = getShapeHistogram(Ps, Ns, n, radius)
-print hist
-
-plt.hist(np.sqrt(np.sum(np.multiply(Ps, Ps), axis=0)), bins=np.linspace(0.0, radius, n), normed=True)
-plt.xlabel('Distance')
+sphere = getSphereSamples(resolution)
+hist = getShapeShellHistogram(Ps, Ns, n, radius, sphere)
+plt.plot(hist)
+plt.xlabel('Ordered Sectors (increasing radius, decreasing sector count)')
 plt.ylabel('Frequency')
-plt.title('Shape Shell Histogram')
+plt.title('Sectored Shape Shell Histogram')
 
 plt.show()
