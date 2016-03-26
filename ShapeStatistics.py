@@ -72,9 +72,10 @@ def doPCA(X):
 #Returns: hist (histogram of length NShells)
 def getShapeHistogram(Ps, Ns, NShells, RMax):
     hist = np.zeros(NShells)
-    
-    ##TODO: Finish this; fill in hist
-    
+    bins = np.linspace(0.0, RMax, NShells)
+    indices = np.digitize(np.sum(np.multiply(Ps, Ps), axis=0), bins)
+    count = np.bincount(indices-1)
+    hist[:count.shape[0]] = count
     return hist
     
 #Purpose: To create shape histogram with concentric spherical shells and
