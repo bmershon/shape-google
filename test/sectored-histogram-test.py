@@ -19,6 +19,13 @@ m = PolyMesh()
 m.loadFile(sys.argv[1]) #Load a mesh
 (Ps, Ns) = samplePointCloud(m, 20000) #Sample 20,000 points and associated normals
 sphere = getSphereSamples(resolution)
-hist = getShapeShellHistogram(Ps, Ns, n, radius, sphere)
 
-print hist
+bins = np.arange(n*sphere.shape[1])
+hist = getShapeShellHistogram(Ps, Ns, n, radius, sphere)
+plt.bar(bins, hist / np.sum(hist), width=bins[1]-bins[0])
+
+plt.xlabel('Sector # (increasing shell radius, decreasing count within shell)')
+plt.ylabel('Frequency')
+plt.title("Sectored Shell Histogram")
+
+plt.show()

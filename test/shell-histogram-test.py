@@ -17,6 +17,13 @@ radius = 3
 m = PolyMesh()
 m.loadFile(sys.argv[1]) #Load a mesh
 (Ps, Ns) = samplePointCloud(m, 20000) #Sample 20,000 points and associated normals
-hist = getShapeHistogram(Ps, Ns, n, radius)
 
-print hist
+bins = np.linspace(0.0, radius, n)
+hist = getShapeHistogram(Ps, Ns, n, radius)
+plt.bar(bins, hist / np.sum(hist), width=bins[1]-bins[0])
+
+plt.xlabel('Distance')
+plt.ylabel('Probability')
+plt.title("Shell Histogram")
+
+plt.show()

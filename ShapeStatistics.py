@@ -35,15 +35,29 @@ def exportPointCloud(Ps, Ns, filename):
 #then scale all of the points so that the RMS distance to the origin is 1
 def samplePointCloud(mesh, N):
     (Ps, Ns) = mesh.randomlySamplePoints(N)
-    Ps = Ps - getCentroid(Ps)
-    scale = 1 / (np.sqrt(np.sum(np.multiply(Ps, Ps)) / N))
+    centroid = getCentroid(Ps)
+    Ps = Ps - centroid
+    scale = 1 / (np.sqrt(np.sum(np.square(Ps) / N)))
     Ps = np.multiply(scale, Ps)
+    RMS = np.sqrt(np.sum(np.square(Ps)) / N)
+    print("mesh translated by \n %s\nscaled by %s, RMS is %s" % (centroid, scale, RMS))
     return (Ps, Ns)
 
 # Returns a 3 x 1 matrix
 def getCentroid(PC):
     # mean of column vectors (axis 1) 
     return np.mean(PC, 1, keepdims=True)
+
+def length(u):
+    return np.sqrt(np.sum(np.square(u)))
+
+def dot(u, v):
+    return np.dot(u, v)
+
+def angle(a, b, c):
+    u = b - a
+    v = c - a
+    return np.arccos(dot(u, v) / (length(u) * length(v)))
 
 #Purpose: To sample the unit sphere as evenly as possible.  The higher
 #res is, the more samples are taken on the sphere (in an exponential 
@@ -107,6 +121,7 @@ def getShapeShellHistogram(Ps, Ns, NShells, RMax, SPoints):
         nearest = np.argmax(D, 1) # for each point, the index of nearest spherical direction
         count = np.bincount(nearest) # points associated with each direction
         hist[i, :count.shape[0]] = np.sort(count)[::-1] 
+    
     return hist.flatten() #Flatten the 2D histogram to a 1D array
 
 #Purpose: To create shape histogram with concentric spherical shells and to 
@@ -117,13 +132,13 @@ def getShapeShellHistogram(Ps, Ns, NShells, RMax, SPoints):
 #to be used to cluster shells
 def getShapeHistogramPCA(Ps, Ns, NShells, RMax):
     hist = np.zeros((NShells, 3))
-    bins = np.square(np.linspace(0.0, RMax, NShells))
-    indices = np.digitize(np.sum(np.multiply(Ps, Ps), axis=0), bins) - 1
+    bins = np.square(np.linspace(0.0, RMax, NShells)) # squared radii
+    indices = np.digitize(np.sum(np.square(Ps), axis=0), bins) - 1
     for i in range(NShells):
         subset = Ps[:, indices == i]
         D = np.dot(subset, subset.T)
-        (eigs, V) = np.linalg.eig(D) #Eigenvectors in columns
-        hist[i, :eigs.shape[0]] = np.sort(eigs)[::-1] 
+        (eigs, V) = np.linalg.eig(D) # Eigenvectors in columns
+        hist[i, :eigs.shape[0]] = np.sort(eigs)[::-1] # decreasing eigenvalues
     return hist.flatten() #Flatten the 2D histogram to a 1D array
 
 #Purpose: To create shape histogram of the pairwise Euclidean distances between
@@ -133,13 +148,16 @@ def getShapeHistogramPCA(Ps, Ns, NShells, RMax):
 #NBins (number of histogram bins), NSamples (number of pairs of points sample
 #to compute distances)
 def getD2Histogram(Ps, Ns, DMax, NBins, NSamples):
+    N = NSamples * 2
+    if N > Ps.shape[1]: N = (Ps.shape[1] // 2) * 2
     hist = np.zeros(NBins)
-    bins = np.linspace(0.0, DMax, NBins)
-    copy = np.copy(Ps)
-    shuffle(copy[:, :(copy.shape[1] // 2) * 2]) # even number of points
-    a = copy[:, ::2] # evens
-    b = copy[:, 1::2] # odds
-    distances = np.sum(np.square(a - b), axis=0)
+    bins = np.square(np.linspace(0.0, DMax, NBins)) # squared distances
+    perm = np.arange(Ps.shape[1])
+    shuffle(perm) # permutation of indices to sample
+    sample = Ps[:, perm[:N]] # sample only 2 x N points
+    a = sample[:, 0::2] # evens
+    b = sample[:, 1::2] # odds
+    distances = np.sum(np.square(a - b), axis=0) # squared distances
     indices = np.digitize(distances, bins) - 1
     count = np.bincount(indices)
     hist[:count.shape[0]] = count
@@ -151,8 +169,17 @@ def getD2Histogram(Ps, Ns, DMax, NBins, NSamples):
 #but passed along for consistency), NBins (number of histogram bins), 
 #NSamples (number of triples of points sample to compute angles)
 def getA3Histogram(Ps, Ns, NBins, NSamples):
+    N = NSamples * 3
+    if N > Ps.shape[1]: N = (Ps.shape[1] // 3) * 3
     hist = np.zeros(NBins)
-    ##TODO: Finish this; fill in hist
+    bins = np.square(np.linspace(0.0, 2 * np.pi, NBins)) # squared distances
+    perm = np.arange(Ps.shape[1])
+    shuffle(perm) # permutation of indices to sample
+    sample = Ps[:, perm[:N]] # sample only 2 x N points
+    # a = sample[:, 0::3] 
+    # b = sample[:, 1::3]
+    # c = sample[:, 2::3]
+    # angles = 
     return hist
 
 #Purpose: To create the Extended Gaussian Image by binning normals to

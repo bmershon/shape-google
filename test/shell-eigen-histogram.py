@@ -17,6 +17,13 @@ radius = 3
 m = PolyMesh()
 m.loadFile(sys.argv[1]) #Load a mesh
 (Ps, Ns) = samplePointCloud(m, 20000) #Sample 20,000 points and associated normals
-hist = getShapeHistogramPCA(Ps, Ns, n, radius)
 
-print hist
+bins = np.arange(n*3)
+hist = getShapeHistogramPCA(Ps, Ns, n, radius)
+plt.bar(bins, hist / np.sum(hist), width=bins[1]-bins[0])
+
+plt.xlabel('Eigenvalues # (increasing shell radius, decreasing value within shell)')
+plt.ylabel('Frequency')
+plt.title("Eigenvalue Shell Histogram")
+
+plt.show()
