@@ -13,17 +13,17 @@ from ShapeStatistics import *
 np.random.seed(100) #Replace 100 with some number you both agree on
 
 n = 10
-radius = 3
+radius = 2
 m = PolyMesh()
 m.loadFile(sys.argv[1]) #Load a mesh
 (Ps, Ns) = samplePointCloud(m, 20000) #Sample 20,000 points and associated normals
 
-bins = np.arange(n*3)
-hist = getShapeHistogramPCA(Ps, Ns, n, radius)
-plt.bar(bins, hist / np.sum(hist), width=bins[1]-bins[0])
+bins = np.linspace(0.0, radius, n + 1)
+hist = getShapeHistogram(Ps, Ns, n, radius)
+plt.bar(bins[:-1], hist, width=bins[1]-bins[0])
 
-plt.xlabel('Eigenvalues # (increasing shell radius, decreasing value within shell)')
+plt.xlabel('Distance')
 plt.ylabel('Frequency')
-plt.title("Eigenvalue Shell Histogram")
+plt.title("Shell Histogram")
 
 plt.show()

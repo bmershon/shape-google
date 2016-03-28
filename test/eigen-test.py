@@ -12,20 +12,18 @@ from ShapeStatistics import *
 
 np.random.seed(100) #Replace 100 with some number you both agree on
 
-resolution = 1
 n = 10
-radius = 3
+radius = 2
 m = PolyMesh()
 m.loadFile(sys.argv[1]) #Load a mesh
 (Ps, Ns) = samplePointCloud(m, 20000) #Sample 20,000 points and associated normals
-sphere = getSphereSamples(resolution)
 
-bins = np.arange(n*sphere.shape[1])
-hist = getShapeShellHistogram(Ps, Ns, n, radius, sphere)
-plt.bar(bins, hist / np.sum(hist), width=bins[1]-bins[0])
+bins = np.linspace(0, radius, 3*n + 1)
+hist = getShapeHistogramPCA(Ps, Ns, n, radius)
+plt.bar(bins[:-1], hist, width=bins[1]-bins[0])
 
-plt.xlabel('Sector # (increasing shell radius, decreasing count within shell)')
+plt.xlabel('Eigenvalues # (increasing shell radius, decreasing value within shell)')
 plt.ylabel('Frequency')
-plt.title("Sectored Shell Histogram")
+plt.title("Eigenvalue Shell Histogram")
 
 plt.show()

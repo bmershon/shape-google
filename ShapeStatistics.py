@@ -37,7 +37,7 @@ def samplePointCloud(mesh, N):
     (Ps, Ns) = mesh.randomlySamplePoints(N)
     centroid = getCentroid(Ps)
     Ps = Ps - centroid
-    scale = 1 / (np.sqrt(np.sum(np.square(Ps) / N)))
+    scale = 1 / (np.sqrt(np.sum(np.square(Ps)) / N))
     Ps = np.multiply(scale, Ps)
     RMS = np.sqrt(np.sum(np.square(Ps)) / N)
     print("mesh translated by \n %s\nscaled by %s, RMS is %s" % (centroid, scale, RMS))
@@ -97,11 +97,12 @@ def shuffle(array):
 #Returns: hist (histogram of length NShells)
 def getShapeHistogram(Ps, Ns, NShells, RMax):
     hist = np.zeros(NShells)
-    bins = np.square(np.linspace(0.0, RMax, NShells))
+    bins = np.square(np.linspace(0.0, RMax, NShells + 1))
     indices = np.digitize(np.sum(np.multiply(Ps, Ps), axis=0), bins) - 1
+    print bins.shape, np.unique(indices)
     count = np.bincount(indices)
     hist[:count.shape[0]] = count
-    
+     
     return hist
     
 #Purpose: To create shape histogram with concentric spherical shells and
@@ -113,7 +114,7 @@ def getShapeHistogram(Ps, Ns, NShells, RMax):
 def getShapeShellHistogram(Ps, Ns, NShells, RMax, SPoints):
     NSectors = SPoints.shape[1] # number of spherical samples
     hist = np.zeros((NShells, NSectors))    
-    bins = np.square(np.linspace(0.0, RMax, NShells))
+    bins = np.square(np.linspace(0.0, RMax, NShells + 1))
     indices = np.digitize(np.sum(np.multiply(Ps, Ps), axis=0), bins) - 1
     for i in range(NShells):
         subset = Ps[:, indices == i]
@@ -132,7 +133,7 @@ def getShapeShellHistogram(Ps, Ns, NShells, RMax, SPoints):
 #to be used to cluster shells
 def getShapeHistogramPCA(Ps, Ns, NShells, RMax):
     hist = np.zeros((NShells, 3))
-    bins = np.square(np.linspace(0.0, RMax, NShells)) # squared radii
+    bins = np.square(np.linspace(0.0, RMax, NShells + 1)) # squared radii
     indices = np.digitize(np.sum(np.square(Ps), axis=0), bins) - 1
     for i in range(NShells):
         subset = Ps[:, indices == i]
@@ -151,7 +152,7 @@ def getD2Histogram(Ps, Ns, DMax, NBins, NSamples):
     N = NSamples * 2
     if N > Ps.shape[1]: N = (Ps.shape[1] // 2) * 2
     hist = np.zeros(NBins)
-    bins = np.square(np.linspace(0.0, DMax, NBins)) # squared distances
+    bins = np.square(np.linspace(0.0, DMax, NBins + 1)) # squared distances
     perm = np.arange(Ps.shape[1])
     shuffle(perm) # permutation of indices to sample
     sample = Ps[:, perm[:N]] # sample only 2 x N points
