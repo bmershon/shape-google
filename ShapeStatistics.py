@@ -150,11 +150,14 @@ def getD2Histogram(Ps, Ns, DMax, NBins, NSamples):
     if N > Ps.shape[1]: N = (Ps.shape[1] // 2) * 2
     hist = np.zeros(NBins)
     bins = np.square(np.linspace(0.0, DMax, NBins + 1)) # squared distances
+
     perm = np.arange(Ps.shape[1])
     shuffle(perm) # permutation of indices to sample
     sample = Ps[:, perm[:N]] # sample only 2 x N points
+
     a = sample[:, 0::2] # evens
     b = sample[:, 1::2] # odds
+
     distances = np.sum(np.square(a - b), axis=0) # squared distances
     indices = np.digitize(distances, bins) - 1
     count = np.bincount(indices)[:NBins] # dump values greater than DMax
@@ -170,14 +173,22 @@ def getA3Histogram(Ps, Ns, NBins, NSamples):
     N = NSamples * 3
     if N > Ps.shape[1]: N = (Ps.shape[1] // 3) * 3
     hist = np.zeros(NBins)
-    bins = np.square(np.linspace(0.0, 2 * np.pi, NBins)) # squared distances
+    bins = np.linspace(0.0, np.pi, NBins + 1) # squared distances
+
     perm = np.arange(Ps.shape[1])
     shuffle(perm) # permutation of indices to sample
     sample = Ps[:, perm[:N]] # sample only 2 x N points
-    # a = sample[:, 0::3] 
-    # b = sample[:, 1::3]
-    # c = sample[:, 2::3]
-    # angles = 
+
+    a = sample[:, 0::3] 
+    b = sample[:, 1::3]
+    c = sample[:, 2::3]
+
+    angles = np.array(map(angle, a.T, b.T, c.T))
+    indices = np.digitize(angles, bins) - 1
+    count = np.bincount(indices)[:NBins]
+    hist[:count.shape[0]] = count
+
+
     return hist
 
 #Purpose: To create the Extended Gaussian Image by binning normals to

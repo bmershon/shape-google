@@ -13,7 +13,7 @@ import ShapeStatistics as shp
 np.random.seed(100) #Replace 100 with some number you both agree on
 
 N = 5000
-n = 20
+n = 30
 
 distance = 5
 
