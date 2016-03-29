@@ -13,14 +13,13 @@ from ShapeStatistics import *
 np.random.seed(100) #Replace 100 with some number you both agree on
 
 resolution = 2
-n = 10
-radius = 2
+
 m = PolyMesh()
 m.loadFile(sys.argv[1]) #Load a mesh
 (Ps, Ns) = samplePointCloud(m, 20000) #Sample 20,000 points and associated normals
 sphere = getSphereSamples(resolution)
 
-bins = np.linspace(0, radius, n*sphere.shape[1] + 1)
+bins = np.linspace(0, radius, sphere.shape[1] + 1)
 hist = getShapeShellHistogram(Ps, Ns, n, radius, sphere)
 plt.bar(bins[:-1], hist, width=bins[1]-bins[0])
 

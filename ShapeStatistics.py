@@ -188,7 +188,6 @@ def getA3Histogram(Ps, Ns, NBins, NSamples):
     count = np.bincount(indices)[:NBins]
     hist[:count.shape[0]] = count
 
-
     return hist
 
 #Purpose: To create the Extended Gaussian Image by binning normals to
@@ -199,7 +198,11 @@ def getA3Histogram(Ps, Ns, NBins, NSamples):
 def getEGIHistogram(Ps, Ns, SPoints):
     S = SPoints.shape[1]
     hist = np.zeros(S)
-    ##TOOD: Finish this; fill in hist
+    rotated = np.dot(R.T,Ps)
+    D = np.dot(Ps.T, SPoints) # N x M
+    nearest = np.argmax(D, 1) # for each point, the index of nearest spherical direction
+    count = np.bincount(nearest) # points associated with each direction
+    hist[:count.shape[0]] = count
     return hist
 
 #Purpose: To create an image which stores the amalgamation of rotating
@@ -214,7 +217,6 @@ def getSpinImage(Ps, Ns, NAngles, Extent, Dim):
     hist = np.zeros((Dim, Dim))
     #TODO: Finish this
     return hist.flatten()
-
 
 #Purpose: To create a histogram of spherical harmonic magnitudes in concentric
 #spheres after rasterizing the point cloud to a voxel grid
