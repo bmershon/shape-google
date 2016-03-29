@@ -12,7 +12,8 @@ from ShapeStatistics import *
 
 np.random.seed(100) #Replace 100 with some number you both agree on
 
-n = 10
+n = 30
+
 radius = 2
 m = PolyMesh()
 m.loadFile(sys.argv[1]) #Load a mesh

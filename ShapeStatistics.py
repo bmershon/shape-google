@@ -99,10 +99,8 @@ def getShapeHistogram(Ps, Ns, NShells, RMax):
     hist = np.zeros(NShells)
     bins = np.square(np.linspace(0.0, RMax, NShells + 1))
     indices = np.digitize(np.sum(np.multiply(Ps, Ps), axis=0), bins) - 1
-    print bins.shape, np.unique(indices)
-    count = np.bincount(indices)
+    count = np.bincount(indices)[:NShells]
     hist[:count.shape[0]] = count
-     
     return hist
     
 #Purpose: To create shape histogram with concentric spherical shells and
@@ -122,7 +120,6 @@ def getShapeShellHistogram(Ps, Ns, NShells, RMax, SPoints):
         nearest = np.argmax(D, 1) # for each point, the index of nearest spherical direction
         count = np.bincount(nearest) # points associated with each direction
         hist[i, :count.shape[0]] = np.sort(count)[::-1] 
-    
     return hist.flatten() #Flatten the 2D histogram to a 1D array
 
 #Purpose: To create shape histogram with concentric spherical shells and to 
@@ -135,7 +132,7 @@ def getShapeHistogramPCA(Ps, Ns, NShells, RMax):
     hist = np.zeros((NShells, 3))
     bins = np.square(np.linspace(0.0, RMax, NShells + 1)) # squared radii
     indices = np.digitize(np.sum(np.square(Ps), axis=0), bins) - 1
-    for i in range(NShells):
+    for i in range(NShells): # ignore overflow bin at index NShells
         subset = Ps[:, indices == i]
         D = np.dot(subset, subset.T)
         (eigs, V) = np.linalg.eig(D) # Eigenvectors in columns
@@ -160,7 +157,7 @@ def getD2Histogram(Ps, Ns, DMax, NBins, NSamples):
     b = sample[:, 1::2] # odds
     distances = np.sum(np.square(a - b), axis=0) # squared distances
     indices = np.digitize(distances, bins) - 1
-    count = np.bincount(indices)
+    count = np.bincount(indices)[:NBins] # dump values greater than DMax
     hist[:count.shape[0]] = count
     return hist
 

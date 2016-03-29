@@ -8,18 +8,25 @@ from PolyMesh import *
 import numpy as np
 import matplotlib.pyplot as plt
 
-from ShapeStatistics import *
+import ShapeStatistics as shp
 
 np.random.seed(100) #Replace 100 with some number you both agree on
 
 N = 5000
 n = 20
 
-distance = 3
+distance = 5
 
 m = PolyMesh()
 m.loadFile(sys.argv[1]) #Load a mesh
-(Ps, Ns) = samplePointCloud(m, 20000) #Sample 20,000 points and associated normals
-hist = getD2Histogram(Ps, Ns, distance, n, N)
+(Ps, Ns) = shp.samplePointCloud(m, 20000) #Sample 20,000 points and associated normals
 
-print hist
+bins = np.linspace(0, distance, n + 1)
+hist = shp.getD2Histogram(Ps, Ns, distance, n, N)
+plt.bar(bins[:-1], hist, width=bins[1]-bins[0])
+
+plt.xlabel('Distance between pairs of points')
+plt.ylabel('Frequency')
+plt.title("D2 Histogram")
+
+plt.show()
