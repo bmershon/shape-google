@@ -1,9 +1,9 @@
 # author Brooks Mershon
 
-models := $(shell find models/ -name *.off)
+MODELS := $(shell find models_off/ -name *.off )
 
 GENERATED_FILES = \
-	build/build.log
+	$(MODELS)
 
 all: $(GENERATED_FILES)
 
@@ -13,6 +13,6 @@ clean:
 	rm -rf -- $(GENERATED_FILES) build
 
 # Build unit sphere meshes with EGI color coding
-build/%.off: 
-	mkdir -p $(dir $@)
-	for f in models_off/*.off; do python test/EGI-test.py models_off/{f} build/EGI/{f}; done
+EGI: 
+	mkdir -p build/EGI
+	@$(foreach m,$(MODELS),python test/EGI-test.py models_off/$(m) build/EGI/$(m);)
