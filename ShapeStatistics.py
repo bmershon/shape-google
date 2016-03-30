@@ -198,7 +198,12 @@ def getA3Histogram(Ps, Ns, NBins, NSamples):
 def getEGIHistogram(Ps, Ns, SPoints):
     S = SPoints.shape[1]
     hist = np.zeros(S)
-    rotated = np.dot(R.T,Ps)
+
+    # align point cloud with PCA axes
+    D = np.dot(Ps, Ps.T)
+    [eigs, R] = np.linalg.eig(D)
+    rotated = np.dot(R.T, Ps)
+
     D = np.dot(Ps.T, SPoints) # N x M
     nearest = np.argmax(D, 1) # for each point, the index of nearest spherical direction
     count = np.bincount(nearest) # points associated with each direction
