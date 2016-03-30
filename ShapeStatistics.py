@@ -202,9 +202,9 @@ def getEGIHistogram(Ps, Ns, SPoints):
     # align point cloud with PCA axes
     D = np.dot(Ps, Ps.T)
     [eigs, R] = np.linalg.eig(D)
-    rotated = np.dot(R.T, Ps)
+    rotated = np.dot(R.T, Ns)
 
-    D = np.dot(Ps.T, SPoints) # N x M
+    D = np.dot(rotated.T, SPoints) # N x M
     nearest = np.argmax(D, 1) # for each point, the index of nearest spherical direction
     count = np.bincount(nearest) # points associated with each direction
     hist[:count.shape[0]] = count
