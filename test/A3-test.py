@@ -16,7 +16,7 @@ N = 5000
 n = 20
 
 m = PolyMesh()
-m.loadFile(sys.argv[1]) #Load a mesh
+m.loadOffFileExternal(sys.argv[1]) #Load a mesh
 (Ps, Ns) = shp.samplePointCloud(m, 20000) #Sample 20,000 points and associated normals
 
 bins = np.linspace(0, np.pi, n + 1)

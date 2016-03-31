@@ -1,4 +1,4 @@
-# command line: model, sphere output
+# command line: model .off file | output EGI .off file
 
 import sys
 import os
@@ -18,10 +18,8 @@ cmap = plt.get_cmap('jet') # color ramp
 resolution = 2
 n = 10
 
-print sys.argv
-
 m = PolyMesh()
-m.loadFile(sys.argv[1]) #Load a mesh
+m.loadOffFileExternal(sys.argv[1]) #Load a mesh
 (Ps, Ns) = shp.samplePointCloud(m, 20000) #Sample 20,000 points and associated normals
 sphere = getSphereMesh(1, resolution)
 hist = shp.getEGIHistogram(Ps, Ns, sphere.VPos.T)

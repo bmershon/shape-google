@@ -40,7 +40,7 @@ def samplePointCloud(mesh, N):
     scale = 1 / (np.sqrt(np.sum(np.square(Ps)) / N))
     Ps = np.multiply(scale, Ps)
     RMS = np.sqrt(np.sum(np.square(Ps)) / N)
-    print("mesh translated by \n %s\nscaled by %s, RMS is %s" % (centroid, scale, RMS))
+    # print("mesh translated by \n %s\nscaled by %s, RMS is %s" % (centroid, scale, RMS))
     return (Ps, Ns)
 
 # Returns a 3 x 1 matrix
