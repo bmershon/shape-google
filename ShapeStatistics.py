@@ -9,10 +9,6 @@ from PolyMesh import *
 import numpy as np
 import matplotlib.pyplot as plt
 
-POINTCLOUD_CLASSES = ['biplane', 'desk_chair', 'dining_chair', 'fighter_jet', 'fish', 'flying_bird', 'guitar', 'handgun', 'head', 'helicopter', 'human', 'human_arms_out', 'potted_plant', 'race_car', 'sedan', 'shelves', 'ship', 'sword', 'table', 'vase']
-
-NUM_PER_CLASS = 10
-
 #########################################################
 ##                UTILITY FUNCTIONS                    ##
 #########################################################
@@ -57,6 +53,8 @@ def dot(u, v):
 def angle(a, b, c):
     u = b - a
     v = c - a
+    if (length(u) * length(v)) == 0:
+        return np.arccos(1) # default handling of zero-vectors
     return np.arccos(dot(u, v) / (length(u) * length(v)))
 
 #Purpose: To sample the unit sphere as evenly as possible.  The higher
@@ -187,7 +185,6 @@ def getA3Histogram(Ps, Ns, NBins, NSamples):
     indices = np.digitize(angles, bins) - 1
     count = np.bincount(indices)[:NBins]
     hist[:count.shape[0]] = count
-
     return hist
 
 #Purpose: To create the Extended Gaussian Image by binning normals to
@@ -205,8 +202,8 @@ def getEGIHistogram(Ps, Ns, SPoints):
     rotated = np.dot(R.T, Ns)
 
     D = np.dot(rotated.T, SPoints) # N x M
-    nearest = np.argmax(D, 1) # for each point, the index of nearest spherical direction
-    count = np.bincount(nearest) # points associated with each direction
+    nearest = np.argmax(D, 1) # for each normal, the index of nearest spherical direction
+    count = np.bincount(nearest) # number ofnormals associated with each direction
     hist[:count.shape[0]] = count
     return hist
 
@@ -265,11 +262,13 @@ def makeAllHistograms(PointClouds, Normals, histFunction, *args):
 #of each histogram and N is the number of point clouds)
 #Returns: D (An N x N matrix, where the ij entry is the Euclidean
 #distance between the histogram for point cloud i and point cloud j)
-def compareHistsEuclidean(AllHists):
-    N = AllHists.shape[1]
+def compareHistsEuclidean(H):
+    N = H.shape[1]
     D = np.zeros((N, N))
-    #TODO: Finish this, fill in D
-    return D
+    ab = np.dot(H.T, H) # N x N, dot each histogram with another
+    hh = np.sum(H*H, 0) # squared length of each histogram
+    D = (hh[:, np.newaxis] + hh[np.newaxis, :]) - 2*ab
+    return np.sqrt(D)
 
 #Purpose: To compute the cosine distance between a set
 #of histograms
@@ -367,7 +366,7 @@ if __name__ == '__main__':
             m.loadOffFileExternal(filename)
             (Ps, Ns) = samplePointCloud(m, NRandSamples)
             PointClouds.append(Ps)
-            Normals.append(Ps)
+            Normals.append(Ns)
     
     #TODO: Finish this, run experiments.  Also in the above code, you might
     #just want to load one point cloud and test your histograms on that first
