@@ -26,3 +26,5 @@ hist = shp.getEGIHistogram(Ps, Ns, sphere.VPos.T)
 hist = hist / np.max(hist)
 sphere.VColors = np.array(np.round(255.0*cmap(hist)[:, 0:3]), dtype=np.int64)
 sphere.saveOffFile(sys.argv[2], output255 = True)
+
+print hist

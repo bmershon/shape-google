@@ -54,7 +54,7 @@ def angle(a, b, c):
     u = b - a
     v = c - a
     if (length(u) * length(v)) == 0:
-        return np.arccos(1) # default handling of zero-vectors
+        return 0 # default handling of zero-vectors
     return np.arccos(dot(u, v) / (length(u) * length(v)))
 
 #Purpose: To sample the unit sphere as evenly as possible.  The higher

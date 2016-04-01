@@ -36,7 +36,7 @@ sphere = getSphereMesh(1, resolution)
 
 H = np.zeros((sphere.VPos.T.shape[1], len(PointClouds)))
 for i in range(len(PointClouds)):
-    hist = shp.getEGIHistogram(Ps, Ns, sphere.VPos.T)
+    hist = shp.getEGIHistogram(PointClouds[i], Normals[i], sphere.VPos.T)
     H[:, i] = hist
 
 D = shp.compareHistsEuclidean(H)
