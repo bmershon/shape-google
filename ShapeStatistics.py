@@ -9,6 +9,11 @@ from PolyMesh import *
 import numpy as np
 import matplotlib.pyplot as plt
 
+NUM_PER_CLASS = 10
+POINTCLOUD_CLASSES = ['biplane', 'desk_chair', 'dining_chair', 'fighter_jet', 'fish', 'flying_bird', 'guitar', 'handgun', 'head', 'helicopter', 'human', 'human_arms_out', 'potted_plant', 'race_car', 'sedan', 'shelves', 'ship', 'sword', 'table', 'vase']
+# POINTCLOUD_CLASSES = ['biplane', 'handgun', 'vase']
+
+
 #########################################################
 ##                UTILITY FUNCTIONS                    ##
 #########################################################
@@ -36,7 +41,6 @@ def samplePointCloud(mesh, N):
     scale = 1 / (np.sqrt(np.sum(np.square(Ps)) / N))
     Ps = np.multiply(scale, Ps)
     RMS = np.sqrt(np.sum(np.square(Ps)) / N)
-    # print("mesh translated by \n %s\nscaled by %s, RMS is %s" % (centroid, scale, RMS))
     return (Ps, Ns)
 
 # Returns a 3 x 1 matrix
@@ -244,12 +248,14 @@ def makeAllHistograms(PointClouds, Normals, histFunction, *args):
     N = len(PointClouds)
     #Call on first mesh to figure out the dimensions of the histogram
     h0 = histFunction(PointClouds[0], Normals[0], *args)
+    h0 = h0 / np.sum(h0)
     K = h0.size
     AllHists = np.zeros((K, N))
     AllHists[:, 0] = h0
     for i in range(1, N):
         print "Computing histogram %i of %i..."%(i+1, N)
-        AllHists[:, i] = histFunction(PointClouds[i], Normals[i], *args)
+        h = histFunction(PointClouds[i], Normals[i], *args)
+        AllHists[:, i] = histFunction(PointClouds[i], Normals[i], *args) / np.sum(h)
     return AllHists
 
 #########################################################
@@ -263,7 +269,6 @@ def makeAllHistograms(PointClouds, Normals, histFunction, *args):
 #Returns: D (An N x N matrix, where the ij entry is the Euclidean
 #distance between the histogram for point cloud i and point cloud j)
 def compareHistsEuclidean(H):
-    H = np.copy(H) / np.sum(H) # normalize
     N = H.shape[1]
     D = np.zeros((N, N))
     ab = np.dot(H.T, H) # N x N, dot each histogram with another
@@ -342,9 +347,21 @@ def getMyShapeDistances(PointClouds, Normals):
 #Returns PR, an (NPerClass-1) length array of average precision values for all 
 #recalls
 def getPrecisionRecall(D, NPerClass = 10):
-    PR = np.zeros(NPerClass-1)
-    #TODO: Finish this, compute average precision recall graph
-    #using all point clouds as queries
+    PR = np.zeros(NPerClass - 1)
+    Recalls = np.zeros((D.shape[0], NPerClass - 1))
+    for i in range(D.shape[0]):
+        v = np.zeros(NPerClass - 1)
+        base = (i // NPerClass) * NPerClass
+        group = range(base, base+10)
+        index = np.argsort(D[i, :])
+        recalled = 0;
+        for k in range(len(index)):
+            if index[k] in group and index[k] != i:
+                position = k if k > i else k + 1.0
+                recalled = recalled + 1
+                v[recalled - 1] = recalled / position
+        Recalls[i, :] = v
+    PR = np.mean(Recalls, axis=0)
     return PR
 
 #########################################################
@@ -371,23 +388,23 @@ if __name__ == '__main__':
     
     # Precision recall for all classes of shapes, averaged together
     SPoints = getSphereSamples(2)
-    HistsEGI = makeAllHistograms(PointClouds, Normals, getEGIHistogram, SPoints)
-    HistsA3 = makeAllHistograms(PointClouds, Normals, getA3Histogram, 30, 100000)
-    HistsD2 = makeAllHistograms(PointClouds, Normals, getD2Histogram, 3.0, 30, 100000)
+    # HistsEGI = makeAllHistograms(PointClouds, Normals, getEGIHistogram, SPoints)
+    HistsA3 = makeAllHistograms(PointClouds, Normals, getA3Histogram, 30, 10000)
+    HistsD2 = makeAllHistograms(PointClouds, Normals, getD2Histogram, 3.0, 30, 10000)
      
-    DEGI = compareHistsEuclidean(HistsEGI)
+    # DEGI = compareHistsEuclidean(HistsEGI)
     DA3 = compareHistsEuclidean(HistsA3)
     DD2 = compareHistsEuclidean(HistsD2)
      
-    PREGI = getPrecisionRecall(DEGI)
+    # PREGI = getPrecisionRecall(DEGI)
     PRA3 = getPrecisionRecall(DA3)
     PRD2 = getPrecisionRecall(DD2)
      
     recalls = np.linspace(1.0/9.0, 1.0, 9)
-    plt.plot(recalls, PREGI, 'c', label='EGI')
     plt.hold(True)
     plt.plot(recalls, PRA3, 'k', label='A3')
     plt.plot(recalls, PRD2, 'r', label='D2')
+    # plt.plot(recalls, PREGI, 'c', label='EGI')
     plt.xlabel('Recall')
     plt.ylabel('Precision')
     plt.legend()
