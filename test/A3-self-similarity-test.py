@@ -14,7 +14,7 @@ NUM_PER_CLASS = 10
 POINTCLOUD_CLASSES = ['biplane', 'desk_chair', 'dining_chair', 'fighter_jet', 'fish', 'flying_bird', 'guitar', 'handgun', 'head', 'helicopter', 'human', 'human_arms_out', 'potted_plant', 'race_car', 'sedan', 'shelves', 'ship', 'sword', 'table', 'vase']
 
 NRandSamples = 10000 #You can tweak this number
-np.random.seed(200) #For repeatable results randomly sampling
+np.random.seed(100) #For repeatable results randomly sampling
 #Load in and sample all meshes
 PointClouds = []
 Normals = []
@@ -32,11 +32,9 @@ for i in range(len(POINTCLOUD_CLASSES)):
 
 NBins = 20
 NSamples = 1000
-H = np.zeros((NBins, len(PointClouds)))
-for i in range(len(PointClouds)):
-    hist = shp.getA3Histogram(PointClouds[i], Normals[i], NBins, NSamples)
-    H[:, i] = hist
 
+H = shp.makeAllHistograms(PointClouds, Normals, shp.getA3Histogram, NBins, NSamples)
 D = shp.compareHistsEuclidean(H)
-plt.imshow(D); plt.title("A3")
+
+plt.imshow(D); plt.title("A3 (Euclidean Distance)")
 plt.savefig(sys.argv[1])      

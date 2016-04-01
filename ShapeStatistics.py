@@ -197,8 +197,8 @@ def getEGIHistogram(Ps, Ns, SPoints):
     hist = np.zeros(S)
 
     # align point cloud with PCA axes
-    D = np.dot(Ps, Ps.T)
-    [eigs, R] = np.linalg.eig(D)
+    A = np.dot(Ps, Ps.T)
+    [eigs, R] = np.linalg.eig(A)
     rotated = np.dot(R.T, Ns)
 
     D = np.dot(rotated.T, SPoints) # N x M
@@ -263,6 +263,7 @@ def makeAllHistograms(PointClouds, Normals, histFunction, *args):
 #Returns: D (An N x N matrix, where the ij entry is the Euclidean
 #distance between the histogram for point cloud i and point cloud j)
 def compareHistsEuclidean(H):
+    H = np.copy(H) / np.sum(H) # normalize
     N = H.shape[1]
     D = np.zeros((N, N))
     ab = np.dot(H.T, H) # N x N, dot each histogram with another
@@ -368,7 +369,26 @@ if __name__ == '__main__':
             PointClouds.append(Ps)
             Normals.append(Ns)
     
-    #TODO: Finish this, run experiments.  Also in the above code, you might
-    #just want to load one point cloud and test your histograms on that first
-    #so you don't have to wait for all point clouds to load when making
-    #minor tweaks
+    # Precision recall for all classes of shapes, averaged together
+    SPoints = getSphereSamples(2)
+    HistsEGI = makeAllHistograms(PointClouds, Normals, getEGIHistogram, SPoints)
+    HistsA3 = makeAllHistograms(PointClouds, Normals, getA3Histogram, 30, 100000)
+    HistsD2 = makeAllHistograms(PointClouds, Normals, getD2Histogram, 3.0, 30, 100000)
+     
+    DEGI = compareHistsEuclidean(HistsEGI)
+    DA3 = compareHistsEuclidean(HistsA3)
+    DD2 = compareHistsEuclidean(HistsD2)
+     
+    PREGI = getPrecisionRecall(DEGI)
+    PRA3 = getPrecisionRecall(DA3)
+    PRD2 = getPrecisionRecall(DD2)
+     
+    recalls = np.linspace(1.0/9.0, 1.0, 9)
+    plt.plot(recalls, PREGI, 'c', label='EGI')
+    plt.hold(True)
+    plt.plot(recalls, PRA3, 'k', label='A3')
+    plt.plot(recalls, PRD2, 'r', label='D2')
+    plt.xlabel('Recall')
+    plt.ylabel('Precision')
+    plt.legend()
+    plt.show()

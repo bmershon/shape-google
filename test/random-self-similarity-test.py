@@ -1,0 +1,23 @@
+import sys
+import os
+here = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(here + "/../S3DGLPy")
+sys.path.append(here + "/../")
+from Primitives3D import *
+from PolyMesh import *
+import numpy as np
+import matplotlib.pyplot as plt
+
+import ShapeStatistics as shp
+
+def randomHistogram(P, N, length):
+    return np.random.randint(low=1000, size=length)
+
+PointClouds = np.zeros(100)
+Normals = np.zeros(100)
+
+H = shp.makeAllHistograms(PointClouds, Normals, randomHistogram, 30)
+D = shp.compareHistsEuclidean(H)
+
+plt.imshow(D); plt.title("Extended Gaussian Image (Euclidean Distance)")
+plt.savefig(sys.argv[1])      

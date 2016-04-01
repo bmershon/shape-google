@@ -31,12 +31,11 @@ for i in range(len(POINTCLOUD_CLASSES)):
         Normals.append(Ns)
 
 NBins = 20
-NSamples = 1000
-H = np.zeros((NBins, len(PointClouds)))
-for i in range(len(PointClouds)):
-    hist = shp.getD2Histogram(PointClouds[i], Normals[i], 5, NBins, NSamples)
-    H[:, i] = hist / np.sum(hist) # normalize histogram
+NSamples = 5000
+DMax = 3
 
+H = shp.makeAllHistograms(PointClouds, Normals, shp.getD2Histogram, DMax, NBins, NSamples)
 D = shp.compareHistsEuclidean(H)
-plt.imshow(D); plt.title("D2")
+
+plt.imshow(D); plt.title("D2 (Euclidean Distance)")
 plt.savefig(sys.argv[1])      

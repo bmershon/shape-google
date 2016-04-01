@@ -30,15 +30,12 @@ for i in range(len(POINTCLOUD_CLASSES)):
         PointClouds.append(Ps)
         Normals.append(Ns)
 
-resolution = 2
+resolution = 1
 NSamples = 1000
-sphere = getSphereMesh(1, resolution)
+SPoints = shp.getSphereSamples(2)
 
-H = np.zeros((sphere.VPos.T.shape[1], len(PointClouds)))
-for i in range(len(PointClouds)):
-    hist = shp.getEGIHistogram(PointClouds[i], Normals[i], sphere.VPos.T)
-    H[:, i] = hist
-
+H = shp.makeAllHistograms(PointClouds, Normals, shp.getEGIHistogram, SPoints)
 D = shp.compareHistsEuclidean(H)
-plt.imshow(D); plt.title("Extended Gaussian Image")
+
+plt.imshow(D); plt.title("Extended Gaussian Image (Euclidean Distance)")
 plt.savefig(sys.argv[1])      
