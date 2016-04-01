@@ -58,7 +58,7 @@ def angle(a, b, c):
     u = b - a
     v = c - a
     if (length(u) * length(v)) == 0:
-        return 0 # default handling of zero-vectors
+        return 0.0 # default handling of zero-vectors
     return np.arccos(dot(u, v) / (length(u) * length(v)))
 
 #Purpose: To sample the unit sphere as evenly as possible.  The higher
@@ -357,9 +357,9 @@ def getPrecisionRecall(D, NPerClass = 10):
         recalled = 0;
         for k in range(len(index)):
             if index[k] in group and index[k] != i:
-                position = k if k > i else k + 1.0
+                position = k if k > i else k + 1
                 recalled = recalled + 1
-                v[recalled - 1] = recalled / position
+                v[recalled - 1] = recalled / float(position)
         Recalls[i, :] = v
     PR = np.mean(Recalls, axis=0)
     return PR
