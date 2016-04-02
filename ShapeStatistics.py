@@ -350,11 +350,10 @@ def getPrecisionRecall(D, NPerClass = 10):
         group = range(base, base+10)
         index = np.argsort(D[i, :])
         recalled = 0;
-        # assume the shape for the given row is at the first index
         for k in range(len(index)):
             if index[k] in group and index[k] != i:
                 recalled = recalled + 1
-                v[recalled - 1] = recalled / float(k)
+                v[recalled - 1] = recalled / float(max(k, 1))
         Recalls[i, :] = v
     PR = np.mean(Recalls, axis=0)
     return PR
