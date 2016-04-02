@@ -38,10 +38,43 @@ Before generating various precision recall graphs, I found it helpful to look fo
 
 ### Euclidean
 
+In the self-similarity matrices below, blue is *close* and red is *far*. The classes of objects come in groups of 10, so there are 20 contiguous sets of 10 rows, each corresponding to a shape class (e.g., sword, biplane, sedan, table). We hope to see a 10x10 px blue square for each group along the diagonal, with *hotter* colors everywhere else in the same row. This means that a particular group is close to itself and far from others when the histogram signatures are compared using Euclidean distance.
+
 <img src="build/similarity/D2/D2.png" width="405">
 <img src="build/similarity/A3/A3.png" width="404">
 <img src="build/similarity/EGI/EGI.png" width="405">
 <img src="build/similarity/random/random.png" width="405">
+
+We see that for each plot there is a clear structure in which blue squares appear along the diagonal. However, in the case of the **D2 descriptor**, it becomes clear why we see precision recall drop quickly after the first one or two shapes in a class (of 9 other shapes) are found. Looking across one row, we see the dark blue square on the diagonal, but we also see other dark blue pixels spread throughout the row. Therefore, only the first one or two shapes in a class are easily found to be *close* under a metric like Euclidean histogram distance. After the first couple shapes are receovered, many other shapes from outside the class end up having distances from the shape we are comparing it to that are *less* than the distance of the current shape to another member of the same class that has not yet been *recalled*.
+
+
+The **Extended Gaussian Image descriptor** is interesting, because we see that for some shapes it is working rather well, and for other shapes it is failing to produce a nice 10x10 dark blue square along the diagonal. Why is this? Extended Gaussian Image histograms rely on first finding the principal axes of an object and performing a projection onto a new coordinate system in order to attempt to factor out rotation.
+
+```py
+def getEGIHistogram(Ps, Ns, SPoints):
+    S = SPoints.shape[1]
+    hist = np.zeros(S)
+
+    # align point cloud with PCA axes
+    A = np.dot(Ps, Ps.T)
+    [eigs, R] = np.linalg.eig(A)
+    rotated = np.dot(R.T, Ns)
+
+    D = np.dot(rotated.T, SPoints) # N x M
+    nearest = np.argmax(D, 1) # for each normal, the index of nearest spherical direction
+    count = np.bincount(nearest) # number ofnormals associated with each direction
+    hist[:count.shape[0]] = count
+    return hist
+```
+
+In the case of the sword family of shapes, we see that the long blade and handle produce a fairly consistent set of principal axes. But other shapes may be more likely to experience poor PCA axes choices on account of their approximate rotational symmetries. If the choice of PCA axes is bad, we see that garbage in will produce garbage out: items within the same class may appear to have signature histograms that are far apart. This explains why the EGI histogram and Euclidean Distance produced a rather inconsistent structure across different classes in the above self-similarity matrix.
+
+### Earth Mover's Distance
+
+We can also look at D2 and EGI self-similarity matrices when the Earth Mover's Distance is used:
+
+<img src="build/similarity/EMD/D2/EMD-D2.png" width="405">
+<img src="build/similarity/EMD/EGI/EMD-EGI.png" width="404">
 
 #### Precision Recall
 
