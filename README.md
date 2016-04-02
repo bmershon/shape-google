@@ -7,11 +7,11 @@ Please view this README rendered by GitHub at https://github.com/bmershon/shape-
 
 This assignment was completed as part of a course in 3D Digital Geometry (Math 290) taken at Duke University during Spring 2016. The course was taught by [Chris Tralie](http://www.ctralie.com/).
 
-## Background
+### Background
 
 The purpose of this assignment is to implement functions which take samples from a 3D mesh and produce a signature for a given shape. These signatures take the form of one-dimensonal histograms which may be compared using various metrics, such as Euclidean distance and [Earth Mover's Distance](https://en.wikipedia.org/wiki/Earth_mover%27s_distance). A good descriptor will allow shapes to be classified well regardless of their scale and orientation (rotation) in space.
 
-## Features
+### Features
 
 The following features were implemented:
 
@@ -23,20 +23,20 @@ The following features were implemented:
 - A3 Angle Histogram (10 Points)
 - Extended Gaussian Image (10 Points)
 
-## Histogram Comparison
+### Histogram Comparison
 
 The following distance functions were implmented:
 
 - Euclidean Distance (5 Points)
 - 1D Earth Mover's Distance (10 Points)
 
-## Performance Evaluation (25 points)
+### Performance Evaluation (25 points)
 
-### Self-similarity Matrices
+#### Self-similarity Matrices
 
 Before generating various precision recall graphs, I found it helpful to look for the general structure produced by each type of histogram and distance metric.
 
-### Euclidean
+##### Euclidean
 
 In the self-similarity matrices below, blue is *close* and red is *far*. The classes of objects come in groups of 10, so there are 20 contiguous sets of 10 rows, each corresponding to a shape class (e.g., sword, biplane, sedan, table). We hope to see a 10x10 px blue square for each group along the diagonal, with *hotter* colors everywhere else in the same row. This means that a particular group is close to itself and far from others when the histogram signatures are compared using Euclidean distance.
 
@@ -69,13 +69,39 @@ def getEGIHistogram(Ps, Ns, SPoints):
 
 In the case of the sword family of shapes, we see that the long blade and handle produce a fairly consistent set of principal axes. But other shapes may be more likely to experience poor PCA axes choices on account of their approximate rotational symmetries. If the choice of PCA axes is bad, we see that garbage in will produce garbage out: items within the same class may appear to have signature histograms that are far apart. This explains why the EGI histogram and Euclidean Distance produced a rather inconsistent structure across different classes in the above self-similarity matrix.
 
-### Earth Mover's Distance
+##### Earth Mover's Distance
 
 We can also look at D2 and EGI self-similarity matrices when the Earth Mover's Distance is used:
 
 <img src="build/similarity/EMD/D2/EMD-D2.png" width="405">
 <img src="build/similarity/EMD/EGI/EMD-EGI.png" width="404">
 
-#### Precision Recall
+The D2 self-similarity matrix created using Earth Mover's Distance is not substantially different than the previous D2 image using Euclidean distance. However, the EGI image is substantially different. Interestingly, the image indicates that switching from Euclidean distance to EMD trades problems: with EMD, shapes in the same class are close to each other and to shapes in other classes, where with Euclidean distance shapes in the same class are in many cases too far from each other.
 
+### Precision Recall
+
+The precision recall graphs help summarize the operation of looking down a row of the self-similarity matrices and picking indices from coldest to warmest values until all 9 other shapes in the row's class have been recalled:
+
+```py
+def getPrecisionRecall(D, NPerClass = 10):
+    PR = np.zeros(NPerClass - 1)
+    Recalls = np.zeros((D.shape[0], NPerClass - 1))
+    for i in range(D.shape[0]):
+        v = np.zeros(NPerClass - 1)
+        base = (i // NPerClass) * NPerClass
+        group = range(base, base+10)
+        index = np.argsort(D[i, :])
+        recalled = 0;
+        for k in range(len(index)):
+            if index[k] in group and index[k] != i:
+                recalled = recalled + 1
+                v[recalled - 1] = recalled / float(max(k, 1))
+        Recalls[i, :] = v
+    PR = np.mean(Recalls, axis=0)
+    return PR
+```
+
+A comparison of various types of histogram functions suggests that D2 is the best performer. One reason why D2 may perform well for this dataset is that D2 does not depend on rotation, so the other methods which attempt to align a model with PCA axes may be thrown off by shapes with rotational symmetries.
+
+<img src="build/precision-recall/compare/precision-recall.png" width="100%">
 
