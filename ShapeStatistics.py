@@ -9,11 +9,6 @@ from PolyMesh import *
 import numpy as np
 import matplotlib.pyplot as plt
 
-NUM_PER_CLASS = 10
-POINTCLOUD_CLASSES = ['biplane', 'desk_chair', 'dining_chair', 'fighter_jet', 'fish', 'flying_bird', 'guitar', 'handgun', 'head', 'helicopter', 'human', 'human_arms_out', 'potted_plant', 'race_car', 'sedan', 'shelves', 'ship', 'sword', 'table', 'vase']
-# POINTCLOUD_CLASSES = ['biplane', 'handgun', 'vase']
-
-
 #########################################################
 ##                UTILITY FUNCTIONS                    ##
 #########################################################
@@ -248,14 +243,14 @@ def makeAllHistograms(PointClouds, Normals, histFunction, *args):
     N = len(PointClouds)
     #Call on first mesh to figure out the dimensions of the histogram
     h0 = histFunction(PointClouds[0], Normals[0], *args)
-    h0 = h0 / np.sum(h0)
+    h0 = h0 / float(np.sum(h0))
     K = h0.size
     AllHists = np.zeros((K, N))
     AllHists[:, 0] = h0
     for i in range(1, N):
         print "Computing histogram %i of %i..."%(i+1, N)
         h = histFunction(PointClouds[i], Normals[i], *args)
-        AllHists[:, i] = histFunction(PointClouds[i], Normals[i], *args) / np.sum(h)
+        AllHists[:, i] = histFunction(PointClouds[i], Normals[i], *args) / float(np.sum(h))
     return AllHists
 
 #########################################################
@@ -322,7 +317,7 @@ def compareHistsEMD1D(AllHists):
 #Inputs: PointClouds, an array of point cloud matrices, Normals: an array
 #of normal matrices
 #Returns: D: A N x N matrix of distances between point clouds based
-#on your metric, where Dij is the distnace between point cloud i and point cloud j
+#on your metric, where Dij is the distance between point cloud i and point cloud j
 def getMyShapeDistances(PointClouds, Normals):
     #TODO: Finish this
     #This is just an example, but you should experiment to find which features
@@ -355,57 +350,11 @@ def getPrecisionRecall(D, NPerClass = 10):
         group = range(base, base+10)
         index = np.argsort(D[i, :])
         recalled = 0;
+        # assume the shape for the given row is at the first index
         for k in range(len(index)):
             if index[k] in group and index[k] != i:
-                position = k if k > i else k + 1
                 recalled = recalled + 1
-                v[recalled - 1] = recalled / float(position)
+                v[recalled - 1] = recalled / float(k)
         Recalls[i, :] = v
     PR = np.mean(Recalls, axis=0)
     return PR
-
-#########################################################
-##                     MAIN TESTS                      ##
-#########################################################
-
-if __name__ == '__main__':  
-    NRandSamples = 10000 #You can tweak this number
-    np.random.seed(100) #For repeatable results randomly sampling
-    #Load in and sample all meshes
-    PointClouds = []
-    Normals = []
-    for i in range(len(POINTCLOUD_CLASSES)):
-        print "LOADING CLASS %i of %i..."%(i, len(POINTCLOUD_CLASSES))
-        PCClass = []
-        for j in range(NUM_PER_CLASS):
-            m = PolyMesh()
-            filename = "models_off/%s%i.off"%(POINTCLOUD_CLASSES[i], j)
-            print "Loading ", filename
-            m.loadOffFileExternal(filename)
-            (Ps, Ns) = samplePointCloud(m, NRandSamples)
-            PointClouds.append(Ps)
-            Normals.append(Ns)
-    
-    # Precision recall for all classes of shapes, averaged together
-    SPoints = getSphereSamples(2)
-    # HistsEGI = makeAllHistograms(PointClouds, Normals, getEGIHistogram, SPoints)
-    HistsA3 = makeAllHistograms(PointClouds, Normals, getA3Histogram, 30, 10000)
-    HistsD2 = makeAllHistograms(PointClouds, Normals, getD2Histogram, 3.0, 30, 10000)
-     
-    # DEGI = compareHistsEuclidean(HistsEGI)
-    DA3 = compareHistsEuclidean(HistsA3)
-    DD2 = compareHistsEuclidean(HistsD2)
-     
-    # PREGI = getPrecisionRecall(DEGI)
-    PRA3 = getPrecisionRecall(DA3)
-    PRD2 = getPrecisionRecall(DD2)
-     
-    recalls = np.linspace(1.0/9.0, 1.0, 9)
-    plt.hold(True)
-    plt.plot(recalls, PRA3, 'k', label='A3')
-    plt.plot(recalls, PRD2, 'r', label='D2')
-    # plt.plot(recalls, PREGI, 'c', label='EGI')
-    plt.xlabel('Recall')
-    plt.ylabel('Precision')
-    plt.legend()
-    plt.show()
