@@ -14,7 +14,7 @@ NUM_PER_CLASS = 10
 POINTCLOUD_CLASSES = ['biplane', 'desk_chair', 'dining_chair', 'fighter_jet', 'fish', 'flying_bird', 'guitar', 'handgun', 'head', 'helicopter', 'human', 'human_arms_out', 'potted_plant', 'race_car', 'sedan', 'shelves', 'ship', 'sword', 'table', 'vase']
 
 NRandSamples = 10000 #You can tweak this number
-np.random.seed(100) #For repeatable results randomly sampling
+np.random.seed(42) #For repeatable results randomly sampling
 #Load in and sample all meshes
 PointClouds = []
 Normals = []
@@ -29,22 +29,24 @@ for i in range(len(POINTCLOUD_CLASSES)):
         (Ps, Ns) = shp.samplePointCloud(m, NRandSamples)
         PointClouds.append(Ps)
         Normals.append(Ns)
-
 # Precision recall for all classes of shapes, averaged together
-SPoints = shp.getSphereSamples(2)
-H0 = shp.makeAllHistograms(PointClouds, Normals, shp.getEGIHistogram, 30, 3.0, SPoints=shp.getSphereSamples(2))
-H1 = shp.makeAllHistograms(PointClouds, Normals, shp.getEGIHistogram, 30, 3.0, SPoints=shp.getSphereSamples(3))
+H0 = shp.makeAllHistograms(PointClouds, Normals, shp.getEGIHistogram, shp.getSphereSamples(1))
+H1 = shp.makeAllHistograms(PointClouds, Normals, shp.getEGIHistogram, shp.getSphereSamples(2))
+H2 = shp.makeAllHistograms(PointClouds, Normals, shp.getEGIHistogram, shp.getSphereSamples(3))
  
 D0 = shp.compareHistsEuclidean(H0)
 D1 = shp.compareHistsEuclidean(H1)
+D2 = shp.compareHistsEuclidean(H2)
  
 PR0 = shp.getPrecisionRecall(D0)
 PR1 = shp.getPrecisionRecall(D1)
+PR2 = shp.getPrecisionRecall(D2)
  
 recalls = np.linspace(1.0/9.0, 1.0, 9)
 plt.hold(True)
-plt.plot(recalls, PR0, 'r', label='EGI (low Resolution)')
-plt.plot(recalls, PR1, 'k', label='EGI (high resolution)')
+plt.plot(recalls, PR0, 'r', label='EGI (18 directions)')
+plt.plot(recalls, PR1, 'k', label='EGI (66 directions)')
+plt.plot(recalls, PR2, 'c', label='EGI (258 directions)')
 plt.xlabel('Recall')
 plt.ylabel('Precision')
 plt.legend()

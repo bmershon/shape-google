@@ -301,10 +301,17 @@ def compareHistsChiSquared(AllHists):
 #of each histogram and N is the number of point clouds)
 #Returns: D (An N x N matrix, where the ij entry is the earth mover's
 #distance between the histogram for point cloud i and point cloud j)
-def compareHistsEMD1D(AllHists):
-    N = AllHists.shape[1]
+def compareHistsEMD1D(H):
+    K = H.shape[0]
+    N = H.shape[1]
     D = np.zeros((N, N))
-    #TODO: Finish this, fill in D
+    CDF = np.zeros((K, N))
+    CDF[0, :] = H[0, :]
+    for i in range(1, K):
+        CDF[i, :] = CDF[i - 1, :] + H[i, :]
+    # Use transposes and broadcasting so that third dimension can be used to sum
+    # corresponding distances.
+    D = np.sum(np.absolute(CDF[:, np.newaxis, :].T - CDF.T[np.newaxis, :, :]), axis=2)
     return D
 
 

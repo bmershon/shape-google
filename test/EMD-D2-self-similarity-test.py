@@ -30,23 +30,12 @@ for i in range(len(POINTCLOUD_CLASSES)):
         PointClouds.append(Ps)
         Normals.append(Ns)
 
-# Precision recall for all classes of shapes, averaged together
-SPoints = shp.getSphereSamples(2)
-H0 = shp.makeAllHistograms(PointClouds, Normals, shp.getD2Histogram, 3.0, 30, 1000)
-H1 = shp.makeAllHistograms(PointClouds, Normals, shp.getD2Histogram, 3.0, 30, 10000)
- 
-D0 = shp.compareHistsEuclidean(H0)
-D1 = shp.compareHistsEuclidean(H1)
- 
-PR0 = shp.getPrecisionRecall(D0)
-PR1 = shp.getPrecisionRecall(D1)
- 
-recalls = np.linspace(1.0/9.0, 1.0, 9)
-plt.hold(True)
-plt.plot(recalls, PR0, 'r', label='D2 (1,000 samples)')
-plt.plot(recalls, PR1, 'k', label='D2 (10,000 samples)')
-plt.xlabel('Recall')
-plt.ylabel('Precision')
-plt.title('Precision Recall for D2 Histograms (Euclidean)')
-plt.legend()
-plt.savefig(sys.argv[1])
+NBins = 30
+NSamples = 10000
+DMax = 3
+
+H = shp.makeAllHistograms(PointClouds, Normals, shp.getD2Histogram, DMax, NBins, NSamples)
+D = shp.compareHistsEMD1D(H)
+
+plt.imshow(D); plt.title("D2 (Earth Mover's Distance)")
+plt.savefig(sys.argv[1])      
