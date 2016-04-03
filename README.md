@@ -149,7 +149,7 @@ A summary of the unique features of the descriptors:
 
 - Increasing the number of samples improves precision recall for D2 under Euclidean Distance up to about 10,000 samples.
 - Binning has little effect on Shell Histograms. *This was surprising.*
-- Earth Mover's Distance is actually worse for Extended Gaussian Image classification.
+- Earth Mover's Distance is actually worse for Extended Gaussian Image classification, but better for the Shell histogram.
 - The number of spherical directions used for EGI under Euclidean distance comparison had little effect on precision-recall.
 
 <img src="build/precision-recall/D2/precision-recall-D2.png" width="405">
