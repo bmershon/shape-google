@@ -80,6 +80,7 @@ The D2 self-similarity matrix created using Earth Mover's Distance is not substa
 
 ### Precision Recall
 
+#### Different descriptors
 The precision recall graphs help summarize the operation of looking down a row of the self-similarity matrices and picking indices from coldest to warmest values until all 9 other shapes in the row's class have been recalled:
 
 ```py
@@ -103,5 +104,36 @@ def getPrecisionRecall(D, NPerClass = 10):
 
 A comparison of various types of histogram functions suggests that D2 is the best performer. One reason why D2 may perform well for this dataset is that D2 does not depend on rotation, so the other methods which attempt to align a model with PCA axes may be thrown off by shapes with rotational symmetries.
 
+It is important to note that A3 is not too much worse than D2, yet EGI is considerably worse than all of the tested metrics. As was noted when we looked at the self-similarity matrices, EGI may suffer from poor PCA alignments due to rotational symmetries in many of the objects.I did find that EMD actually lowered the precision recall for EGI, but it seemed more appropriate to use this descriptor for EGI.
+
+A summary of the unique features of the descriptors:
+
+- **D2**: does not care about rotation
+- **A3**: does not care about rotation, but performed worse than D2 on the first couple of recalled shapes
+- **Shell**: does not care about rotation, performed nearly the same as A3 and the sectored shell descriptor
+- **Sectored Shell**: does not care about rotation
+- **EGI**: subject to poor PCA axes alignment, which makes shapes within the same class appear far under Euclidean, EMD
+- **Random**: this control demonstrates that the other descriptors do in fact aid in classifying most of the shapes in a class
+
 <img src="build/precision-recall/compare/precision-recall.png" width="100%">
+
+#### Changing parameters
+
+- Increasing the number of samples increases the precision recall for D2 under Euclidean Distance.
+- Binning has little effect on Shell Histograms.
+- Earth Mover's Distance is actually worse for Extended Gaussian Image classification.
+- The number of spherical directions used for EGI under Euclidean distance comparison had little effect on precision-recall.
+
+<img src="build/precision-recall/D2/precision-recall-D2.png" width="405">
+<img src="build/precision-recall/shell/precision-recall-shell.png" width="405">
+<img src="build/precision-recall/EMD/precision-recall-EMD.png" width="405">
+<img src="build/precision-recall/EGI/precision-recall-EGI.png" width="405">
+
+
+
+
+
+<img src="build/precision-recall/D2/precision-recall-D2.png" width="100%">
+
+
 
