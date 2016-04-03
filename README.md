@@ -128,12 +128,3 @@ A summary of the unique features of the descriptors:
 <img src="build/precision-recall/shell/precision-recall-shell.png" width="405">
 <img src="build/precision-recall/EMD/precision-recall-EMD.png" width="405">
 <img src="build/precision-recall/EGI/precision-recall-EGI.png" width="405">
-
-
-
-
-
-<img src="build/precision-recall/D2/precision-recall-D2.png" width="100%">
-
-
-
