@@ -2,10 +2,10 @@
 # Used to automatically generate create all images included in the assignment README.md
 
 GENERATED_FILES = \
+	build/precision-recall/EMD/precision-recall-EMD.png \
 	build/precision-recall/compare/precision-recall.png \
 	build/precision-recall/shell/precision-recall-shell.png \
 	build/precision-recall/D2/precision-recall-D2.png \
-	build/precision-recall/EMD/precision-recall-EMD.png \
 	build/precision-recall/EGI/precision-recall-EGI.png \
 	build/similarity/EMD/EGI/EMD-EGI.png \
 	build/similarity/EMD/D2/EMD-D2.png \
