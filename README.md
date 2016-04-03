@@ -30,6 +30,23 @@ The following distance functions were implmented:
 - Euclidean Distance (5 Points)
 - 1D Earth Mover's Distance (10 Points)
 
+Here is my implementation of Earth Mover's that makes use of broadcasting:
+
+```python
+def compareHistsEMD1D(H):
+    K = H.shape[0]
+    N = H.shape[1]
+    D = np.zeros((N, N))
+    CDF = np.zeros((K, N))
+    CDF[0, :] = H[0, :]
+    for i in range(1, K):
+        CDF[i, :] = CDF[i - 1, :] + H[i, :]
+    # Use transposes and broadcasting so that third dimension can be used to sum
+    # corresponding distances.
+    D = np.sum(np.absolute(CDF[:, np.newaxis, :].T - CDF.T[np.newaxis, :, :]), axis=2)
+    return D
+```
+
 ### Performance Evaluation (25 points)
 
 #### Self-similarity Matrices
@@ -108,7 +125,7 @@ It is important to note that A3 is not too much worse than D2, yet EGI is consid
 
 A summary of the unique features of the descriptors:
 
-- **D2**: does not care about rotation
+- **D2**: does not care about rotation. **It is notable that in my tests, EMD caused D2 to produce worse precision recall.**
 - **A3**: does not care about rotation, but performed worse than D2 on the first couple of recalled shapes
 - **Shell**: does not care about rotation, performed nearly the same as A3 and the sectored shell descriptor
 - **Sectored Shell**: does not care about rotation
@@ -119,8 +136,8 @@ A summary of the unique features of the descriptors:
 
 #### Changing parameters
 
-- Increasing the number of samples increases the precision recall for D2 under Euclidean Distance.
-- Binning has little effect on Shell Histograms.
+- Increasing the number of samples improves precision recall for D2 under Euclidean Distance up to about 10,000 samples.
+- Binning has little effect on Shell Histograms. *This was surprising.*
 - Earth Mover's Distance is actually worse for Extended Gaussian Image classification.
 - The number of spherical directions used for EGI under Euclidean distance comparison had little effect on precision-recall.
 
@@ -128,3 +145,38 @@ A summary of the unique features of the descriptors:
 <img src="build/precision-recall/shell/precision-recall-shell.png" width="405">
 <img src="build/precision-recall/EMD/precision-recall-EMD.png" width="405">
 <img src="build/precision-recall/EGI/precision-recall-EGI.png" width="405">
+
+### Classification Contest
+
+Given more time, I had hoped to tinker with weighted combinations of various histograms by looking at self-similarity matrices resulting from their weighted sums. I also had the idea to use **clipped/filtered functions** of various distance matrices as well as **higher-order matrices** resulting from applying global operations such as taking the power of each element in a distance matrix.
+
+I did make a submission in the form of implementing `getMyShapeDistances`:
+
+```py
+def getMyShapeDistances(PointClouds, Normals):
+    HistsD2 = makeAllHistograms(PointClouds, Normals, getD2Histogram, 3.0, 30, 10000)
+    D0 = compareHistsEuclidean(HistsD2)
+
+    HistsA3 = makeAllHistograms(PointClouds, Normals, getA3Histogram, 30, 10000)
+    D1 = compareHistsEuclidean(HistsA3)
+
+    HistsEGI = makeAllHistograms(PointClouds, Normals, getEGIHistogram, getSphereSamples(1))
+    D2 = compareHistsEMD1D(HistsD2)
+
+    z = float(np.sum(D0) + np.sum(D1) + np.sum(D2))
+    D = (D0*np.sum(D0) / z) + (D1*np.sum(D1) / z) + (D2 * np.sum(D2) / z)
+    return D
+```
+
+*This weighting scheme doesn't exactly do much better than D2 and Euclidean distance.* After reading the [Funkhouser paper](http://dpd.cs.princeton.edu/Papers/FunkShapeTog.pdf) on spherical harmonics (which, unlike EGI, don't suffer from poor PCA axes alignment), I believe it would be necessary to at least incorporate D2 and spherical harmonic histograms into a weighting scheme. I am still unsure as to which types of histogram comparators are best for this classification task. My empirical results, which may well be affected by errors in my implementation, show that Earth Mover's distance was worse than Euclidean distance for D2 and A3.
+
+
+Here's the precision recall for a weighted combination of D2, A3, and EGH (EMD). Better than the control, but not spectacular, either.
+
+<img src="build/contest/mershon-contest.png" width="405">
+
+### Note
+
+I am keen to talk to Roger (partnered with Joy Patel) during the next unit to see how he implemented spherical harmonics (in NumPy). Chris Tralie mentioned that this was something he would have to work on for his final project. I dind't get to that task this time around.
+
+I believe my implementation hits between 100 and 105 (contest submission) out of the 100 points needed for a group with two or fewer people.
