@@ -13,6 +13,7 @@ GENERATED_FILES = \
 	build/similarity/A3/A3.png \
 	build/similarity/EGI/EGI.png \
 	build/similarity/random/random.png \
+	build/contest/mershon-contest.png \
 
 all: $(GENERATED_FILES)
 
@@ -82,3 +83,7 @@ build/precision-recall/EMD/%.png:
 build/precision-recall/EGI/%.png:
 	mkdir -p $(dir $@)
 	python test/precision-recall-EGI-test.py $@;
+
+build/contest/%.png:
+	mkdir -p $(dir $@)
+	python contest.py $@;

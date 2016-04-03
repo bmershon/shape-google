@@ -326,13 +326,18 @@ def compareHistsEMD1D(H):
 #Returns: D: A N x N matrix of distances between point clouds based
 #on your metric, where Dij is the distance between point cloud i and point cloud j
 def getMyShapeDistances(PointClouds, Normals):
-    #TODO: Finish this
-    #This is just an example, but you should experiment to find which features
-    #work the best, and possibly come up with a weighted combination of 
-    #different features
-    HistsD2 = makeAllHistograms(PointClouds, Normals, getD2Histogram, 3.0, 30, 100000)
-    DEuc = compareHistsEuclidean(HistsD2)
-    return DEuc
+    HistsD2 = makeAllHistograms(PointClouds, Normals, getD2Histogram, 3.0, 30, 10000)
+    D0 = compareHistsEuclidean(HistsD2)
+
+    HistsA3 = makeAllHistograms(PointClouds, Normals, getA3Histogram, 30, 10000)
+    D1 = compareHistsEuclidean(HistsA3)
+
+    HistsEGI = makeAllHistograms(PointClouds, Normals, getEGIHistogram, getSphereSamples(1))
+    D2 = compareHistsEuclidean(HistsD2)
+    
+    z = float(np.sum(D0) + np.sum(D1) + np.sum(D2))
+    D = (D0*np.sum(D0) / z) + (D1*np.sum(D1) / z) + (D2 * np.sum(D2) / z)
+    return D
 
 #########################################################
 ##                     EVALUATION                      ##
