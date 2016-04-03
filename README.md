@@ -9,6 +9,8 @@ This assignment was completed as part of a course in 3D Digital Geometry (Math 2
 
 ### Background
 
+Estimated time spent: 20 hours
+
 *Models from the 20 classes of shapes (each with 10 variants) and their corresponding Extended Gaussian Images. An extended Gaussian image simply bins the normals sampled from a mesh to directions on a sphere. Color is used to indicate where a lot of normals were binned (red is high frequency, blue is low frequency).*
 
 <img src="build/EGI/biplane0.png" width="202">
