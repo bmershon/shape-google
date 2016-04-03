@@ -107,7 +107,6 @@ The D2 self-similarity matrix created using Earth Mover's Distance is not substa
 
 ### Precision Recall
 
-#### Different descriptors
 The precision recall graphs help summarize the operation of looking down a row of the self-similarity matrices and picking indices from coldest to warmest values until all 9 other shapes in the row's class have been recalled:
 
 ```py
@@ -128,6 +127,8 @@ def getPrecisionRecall(D, NPerClass = 10):
     PR = np.mean(Recalls, axis=0)
     return PR
 ```
+
+#### Different descriptors
 
 A comparison of various types of histogram functions suggests that D2 is the best performer. One reason why D2 may perform well for this dataset is that D2 does not depend on rotation, so the other methods which attempt to align a model with PCA axes may be thrown off by shapes with rotational symmetries.
 
