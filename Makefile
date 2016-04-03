@@ -14,6 +14,8 @@ GENERATED_FILES = \
 	build/similarity/EGI/EGI.png \
 	build/similarity/random/random.png \
 	build/contest/mershon-contest.png \
+	build/EGI/biplane1.off \
+	build/EGI/desk_chair0.off
 
 all: $(GENERATED_FILES)
 
