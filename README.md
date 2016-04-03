@@ -9,6 +9,16 @@ This assignment was completed as part of a course in 3D Digital Geometry (Math 2
 
 ### Background
 
+Estimated time spent: 20 hours
+2 Late days used (from 7 that were never used before)
+
+*Models from the 20 classes of shapes (each with 10 variants) and their corresponding Extended Gaussian Images. An extended Gaussian image simply bins the normals sampled from a mesh to directions on a sphere. Color is used to indicate where a lot of normals were binned (red is high frequency, blue is low frequency).*
+
+<img src="build/EGI/biplane0.png" width="202">
+<img src="build/EGI/biplane0-EGI.png" width="202">
+<img src="build/EGI/chair0.png" width="202">
+<img src="build/EGI/chair0-EGI.png" width="202">
+
 The purpose of this assignment is to implement functions which take samples from a 3D mesh and produce a signature for a given shape. These signatures take the form of one-dimensonal histograms which may be compared using various metrics, such as Euclidean distance and [Earth Mover's Distance](https://en.wikipedia.org/wiki/Earth_mover%27s_distance). A good descriptor will allow shapes to be classified well regardless of their scale and orientation (rotation) in space.
 
 ### Features
@@ -97,7 +107,6 @@ The D2 self-similarity matrix created using Earth Mover's Distance is not substa
 
 ### Precision Recall
 
-#### Different descriptors
 The precision recall graphs help summarize the operation of looking down a row of the self-similarity matrices and picking indices from coldest to warmest values until all 9 other shapes in the row's class have been recalled:
 
 ```py
@@ -118,6 +127,8 @@ def getPrecisionRecall(D, NPerClass = 10):
     PR = np.mean(Recalls, axis=0)
     return PR
 ```
+
+#### Different descriptors
 
 A comparison of various types of histogram functions suggests that D2 is the best performer. One reason why D2 may perform well for this dataset is that D2 does not depend on rotation, so the other methods which attempt to align a model with PCA axes may be thrown off by shapes with rotational symmetries.
 
@@ -176,6 +187,10 @@ Here's the precision recall for a weighted combination of D2, A3, and EGH (EMD).
 <img src="build/contest/mershon-contest.png" width="405">
 
 ### Note
+
+I used a Makefile to automate the process of creating output graphs and models. Makefiles are awesome. When I type make, every file that I want for my report is built if it doesn't already exist. This made the testing process less painful.
+
+There is still too much code duplication in the test files, and the `ShapeStatistics.py` file could be broken up into modules with more appropriate namespacing. Given more time to work on this project, a reorganization of the shape statics functionality would have been my next task for myself.
 
 I am keen to talk to Roger (partnered with Joy Patel) during the next unit to see how he implemented spherical harmonics (in NumPy). Chris Tralie mentioned that this was something he would have to work on for his final project. I dind't get to that task this time around.
 
